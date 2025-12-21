@@ -2,9 +2,35 @@ using Microsoft.EntityFrameworkCore;
 
 public class ApplicationDbContext : DbContext
 {
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+        : base(options)
+    {
+    }
 
     public DbSet<Product> Products { get; set; }
+    public DbSet<Supplier> Suppliers { get; set; }
+    public DbSet<Warehouse> Warehouses { get; set; }
+    public DbSet<Transaction> Transactions { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<Product>()
+            .HasOne(p => p.Supplier)
+            .WithMany(s => s.Products)
+            .HasForeignKey(p => p.SupplierID);
+
+        modelBuilder.Entity<Product>()
+            .HasOne(p => p.Warehouse)
+            .WithMany(w => w.Products)
+            .HasForeignKey(p => p.WarehouseID);
+
+        modelBuilder.Entity<Transaction>()
+            .HasOne(t => t.Product)
+            .WithMany(p => p.Transactions)
+            .HasForeignKey(t => t.ProductID);
+    }
 }
 public class Program
 {

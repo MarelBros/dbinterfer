@@ -2,86 +2,65 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 public class Product
 {
-    [Key]
     public int ProductID { get; set; }
-
-    [Required]
-    [MaxLength(150)]
     public string Name { get; set; }
-
-    [ForeignKey(nameof(Warehouse))]
     public int WarehouseID { get; set; }
-
+    public int SupplierID { get; set; }
     public int Quantity { get; set; }
-
-    [Required]
-    [MaxLength(50)]
     public string ProductCode { get; set; }
 
-    [ForeignKey(nameof(Supplier))]
-    public int SupplierID { get; set; }
-
+    [JsonIgnore]
     public Warehouse Warehouse { get; set; }
+    [JsonIgnore]
     public Supplier Supplier { get; set; }
 
+    [JsonIgnore]
     public ICollection<Transaction> Transactions { get; set; }
+
+}
+
+public class ProductCreate
+{
+    public string Name { get; set; }
+    public int WarehouseID { get; set; }
+    public int SupplierID { get; set; }
+    public int Quantity { get; set; }
+    public string ProductCode { get; set; }
 }
 
 public class Supplier
 {
-    [Key]
     public int SupplierID { get; set; }
-
-    [Required]
-    [MaxLength(150)]
     public string Name { get; set; }
-
-    [MaxLength(255)]
     public string Address { get; set; }
-
-    [Required]
-    [MaxLength(12)]
     public string INN { get; set; }
-
-    [MaxLength(20)]
     public string Phone { get; set; }
 
+    [JsonIgnore]
     public ICollection<Product> Products { get; set; }
 }
-
 public class Warehouse
 {
-    [Key]
     public int WarehouseID { get; set; }
-
-    [Required]
-    [MaxLength(100)]
     public string Name { get; set; }
 
+    [JsonIgnore]
     public ICollection<Product> Products { get; set; }
 }
 
 public class Transaction
 {
-    [Key]
     public int TransactionID { get; set; }
-
-    [ForeignKey(nameof(Product))]
     public int ProductID { get; set; }
-
     public int Quantity { get; set; }
-
-    [Column(TypeName = "money")]
     public decimal Amount { get; set; }
-
-    [Required]
-    [MaxLength(10)]
     public string TransactionType { get; set; }
-
     public DateTime TransactionDate { get; set; }
 
+    [JsonIgnore]
     public Product Product { get; set; }
 }

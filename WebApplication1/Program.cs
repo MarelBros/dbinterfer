@@ -1,4 +1,46 @@
+using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+
+
+var builder = WebApplication.CreateBuilder(args);
+
+Console.Write("SERVER: ");
+string servername = Console.ReadLine();
+
+Console.Write("DATABASE NAME: ");
+string dbname = Console.ReadLine();
+
+Console.Write("User name: ");
+string username = Console.ReadLine();
+
+Console.Write("Password: ");
+string password = Console.ReadLine();
+
+
+string connectionString =
+    $"Server={servername};Database={dbname};User Id={username};Password={password};" +
+    $"MultipleActiveResultSets=True;TrustServerCertificate=True";
+
+
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(connectionString));
+
+builder.Services.AddControllers();
+
+
+builder.WebHost.UseUrls("http://*:5000");
+
+var app = builder.Build();
+
+
+app.UseRouting();
+app.MapControllers();
+
+app.Run();
+
+
 
 public class ApplicationDbContext : DbContext
 {
@@ -31,49 +73,4 @@ public class ApplicationDbContext : DbContext
             .WithMany(p => p.Transactions)
             .HasForeignKey(t => t.ProductID);
     }
-}
-public class Program
-{
-    public static string servername;
-    public static string dbname;
-    public static string username;
-    public static string password;
-    public static void Main(string[] args)
-    {
-        Console.Write("SERVER:");
-        servername = Console.ReadLine();
-        Console.Write("DATABASE NAME:");
-        dbname = Console.ReadLine();
-        Console.Write("User name:");
-        username = Console.ReadLine();
-        Console.Write("password name:");
-        password = Console.ReadLine();
-        CreateHostBuilder(args).Build().Run();
-    }
-
-    public static IHostBuilder CreateHostBuilder(string[] args) =>
-        Host.CreateDefaultBuilder(args)
-            .ConfigureWebHostDefaults(webBuilder =>
-            {
-                webBuilder.ConfigureServices((context, services) =>
-                {
-                    webBuilder.UseUrls("http://*:5000");
-
-                    string connectionString = $"Server={servername};Database={dbname};User Id={username};Password={password};MultipleActiveResultSets=True;TrustServerCertificate=True";
-
-                    services.AddDbContext<ApplicationDbContext>(options =>
-                        options.UseSqlServer(connectionString));
-
-                    services.AddControllers();
-                });
-
-                webBuilder.Configure(app =>
-                {
-                    app.UseRouting();
-                    app.UseEndpoints(endpoints =>
-                    {
-                        endpoints.MapControllers();
-                    });
-                });
-            });
 }

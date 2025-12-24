@@ -40,14 +40,10 @@ app.MapControllers();
 
 app.Run();
 
-
-
 public class ApplicationDbContext : DbContext
 {
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-        : base(options)
-    {
-    }
+        : base(options) { }
 
     public DbSet<Product> Products { get; set; }
     public DbSet<Supplier> Suppliers { get; set; }
@@ -58,19 +54,23 @@ public class ApplicationDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.Entity<Product>()
-            .HasOne(p => p.Supplier)
-            .WithMany(s => s.Products)
-            .HasForeignKey(p => p.SupplierID);
-
-        modelBuilder.Entity<Product>()
-            .HasOne(p => p.Warehouse)
-            .WithMany(w => w.Products)
-            .HasForeignKey(p => p.WarehouseID);
-
         modelBuilder.Entity<Transaction>()
             .HasOne(t => t.Product)
             .WithMany(p => p.Transactions)
             .HasForeignKey(t => t.ProductID);
+
+        modelBuilder.Entity<Transaction>()
+            .HasOne(t => t.Warehouse)
+            .WithMany(w => w.Transactions)
+            .HasForeignKey(t => t.WarehouseID);
+
+        modelBuilder.Entity<Transaction>()
+            .HasOne(t => t.Supplier)
+            .WithMany(s => s.Transactions)
+            .HasForeignKey(t => t.SupplierID);
+
+        modelBuilder.Entity<Transaction>()
+            .Property(t => t.TransactionDate)
+            .HasDefaultValueSql("GETDATE()");
     }
 }

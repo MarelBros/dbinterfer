@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/products")]
 public class ProductsController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
@@ -11,7 +11,6 @@ public class ProductsController : ControllerBase
     {
         _context = context;
     }
-
     [HttpGet]
     public async Task<IActionResult> GetAllProducts()
     {
@@ -22,6 +21,7 @@ public class ProductsController : ControllerBase
                 p.Name,
                 p.Price,
                 p.Code,
+                Warehouse = p.Warehouse.Name,
                 Quantity = _context.Transactions
                     .Where(t => t.ProductID == p.ProductID)
                     .Sum(t => t.TransactionType == "приход"
@@ -38,52 +38,76 @@ public class ProductsController : ControllerBase
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        bool supplierExists = await _context.Suppliers
-            .AnyAsync(s => s.SupplierID == dto.SupplierID);
+        if (!await _context.Warehouses.AnyAsync(w => w.WarehouseID == dto.WarehouseID))
+            return BadRequest("Warehouse not found");
 
-        bool warehouseExists = await _context.Warehouses
-            .AnyAsync(w => w.WarehouseID == dto.WarehouseID);
+        if (!await _context.Suppliers.AnyAsync(s => s.SupplierID == dto.SupplierID))
+            return BadRequest("Supplier not found");
 
-        if (!supplierExists || !warehouseExists)
-            return BadRequest("Supplier or Warehouse not found");
+        using var tr = await _context.Database.BeginTransactionAsync();
 
-        using var dbTransaction = await _context.Database.BeginTransactionAsync();
         var code = string.IsNullOrWhiteSpace(dto.Code)
-            ? $"P-{Guid.NewGuid().ToString("N")[..10].ToUpper()}"
+            ? $"P-{Guid.NewGuid():N}".Substring(0, 12).ToUpper()
             : dto.Code;
 
         var product = new Product
         {
             Name = dto.Name,
             Price = dto.Price,
-            Code = code
+            Code = code,
+            WarehouseID = dto.WarehouseID
         };
 
         _context.Products.Add(product);
         await _context.SaveChangesAsync();
 
-        var firstTransaction = new Transaction
+        _context.Transactions.Add(new Transaction
         {
             ProductID = product.ProductID,
-            WarehouseID = dto.WarehouseID,
             SupplierID = dto.SupplierID,
             Quantity = dto.InitialQuantity,
-            TransactionType = "приход",
-            TransactionDate = DateTime.UtcNow
-        };
-
-        _context.Transactions.Add(firstTransaction);
-        await _context.SaveChangesAsync();
-
-        await dbTransaction.CommitAsync();
-
-        return CreatedAtAction(nameof(GetAllProducts), new
-        {
-            product.ProductID,
-            product.Name,
-            product.Price,
-            product.Code,
-            Quantity = dto.InitialQuantity
+            TransactionType = "приход"
         });
+
+        await _context.SaveChangesAsync();
+        await tr.CommitAsync();
+
+        return Ok();
+    }
+}
+
+[ApiController]
+[Route("api/warehouses")]
+public class WarehousesController : ControllerBase
+{
+    private readonly ApplicationDbContext _context;
+
+    public WarehousesController(ApplicationDbContext context)
+    {
+        _context = context;
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetWarehouses()
+    {
+        return Ok(await _context.Warehouses.ToListAsync());
+    }
+}
+
+[ApiController]
+[Route("api/suppliers")]
+public class SuppliersController : ControllerBase
+{
+    private readonly ApplicationDbContext _context;
+
+    public SuppliersController(ApplicationDbContext context)
+    {
+        _context = context;
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetSuppliers()
+    {
+        return Ok(await _context.Suppliers.ToListAsync());
     }
 }

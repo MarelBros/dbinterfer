@@ -2,7 +2,7 @@
   {
     "ContainingType": "ProductsController",
     "Method": "GetAllProducts",
-    "RelativePath": "api/Products",
+    "RelativePath": "api/products",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
@@ -12,7 +12,7 @@
   {
     "ContainingType": "ProductsController",
     "Method": "CreateProduct",
-    "RelativePath": "api/Products",
+    "RelativePath": "api/products",
     "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
@@ -23,6 +23,26 @@
         "IsRequired": true
       }
     ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "SuppliersController",
+    "Method": "GetSuppliers",
+    "RelativePath": "api/suppliers",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "WarehousesController",
+    "Method": "GetWarehouses",
+    "RelativePath": "api/warehouses",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
     "ReturnTypes": []
   }
 ]

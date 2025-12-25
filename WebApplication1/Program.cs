@@ -52,7 +52,10 @@ public class ApplicationDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        base.OnModelCreating(modelBuilder);
+        modelBuilder.Entity<Product>()
+            .HasOne(p => p.Warehouse)
+            .WithMany(w => w.Products)
+            .HasForeignKey(p => p.WarehouseID);
 
         modelBuilder.Entity<Transaction>()
             .HasOne(t => t.Product)
@@ -60,17 +63,9 @@ public class ApplicationDbContext : DbContext
             .HasForeignKey(t => t.ProductID);
 
         modelBuilder.Entity<Transaction>()
-            .HasOne(t => t.Warehouse)
-            .WithMany(w => w.Transactions)
-            .HasForeignKey(t => t.WarehouseID);
-
-        modelBuilder.Entity<Transaction>()
             .HasOne(t => t.Supplier)
             .WithMany(s => s.Transactions)
-            .HasForeignKey(t => t.SupplierID);
-
-        modelBuilder.Entity<Transaction>()
-            .Property(t => t.TransactionDate)
-            .HasDefaultValueSql("GETDATE()");
+            .HasForeignKey(t => t.SupplierID)
+            .IsRequired(false);
     }
 }

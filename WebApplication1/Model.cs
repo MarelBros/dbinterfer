@@ -7,11 +7,20 @@ public class Product
 {
     public int ProductID { get; set; }
 
+    [Required]
     public string Name { get; set; }
 
+    [Required]
     public decimal Price { get; set; }
 
+    [Required]
     public string Code { get; set; }
+
+    [Required]
+    public int WarehouseID { get; set; }
+
+    [JsonIgnore]
+    public Warehouse Warehouse { get; set; }
 
     [JsonIgnore]
     public ICollection<Transaction> Transactions { get; set; }
@@ -43,21 +52,23 @@ public class Warehouse
     public string Name { get; set; }
 
     [JsonIgnore]
-    public ICollection<Transaction> Transactions { get; set; }
+    public ICollection<Product> Products { get; set; }
 }
 
 public class Transaction
 {
     public int TransactionID { get; set; }
 
+    [Required]
     public int ProductID { get; set; }
-
-    public int WarehouseID { get; set; }
 
     public int? SupplierID { get; set; }
 
+    [Required]
     public int Quantity { get; set; }
-    public string TransactionType { get; set; }
+
+    [Required]
+    public string TransactionType { get; set; } // приход / расход
 
     public DateTime TransactionDate { get; set; }
 
@@ -66,9 +77,6 @@ public class Transaction
 
     [JsonIgnore]
     public Supplier Supplier { get; set; }
-
-    [JsonIgnore]
-    public Warehouse Warehouse { get; set; }
 }
 
 public class ProductCreateDto
@@ -78,7 +86,9 @@ public class ProductCreateDto
 
     [Required]
     public decimal Price { get; set; }
+
     public string? Code { get; set; }
+
     [Required]
     public int WarehouseID { get; set; }
 

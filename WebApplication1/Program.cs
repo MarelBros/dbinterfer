@@ -17,11 +17,13 @@ string username = Console.ReadLine();
 
 Console.Write("Password: ");
 string password = Console.ReadLine();
+Console.Clear();
 
 
 string connectionString =
     $"Server={servername};Database={dbname};User Id={username};Password={password};" +
     $"MultipleActiveResultSets=True;TrustServerCertificate=True";
+//string connectionString = $"Server=DESKTOP-SPHMBQR;Database=STORAGE;TrustServerCertificate=True;Trusted_Connection=True;";
 
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -46,6 +48,7 @@ public class ApplicationDbContext : DbContext
         : base(options) { }
 
     public DbSet<Product> Products { get; set; }
+    public DbSet<User> Users { get; set; }
     public DbSet<Supplier> Suppliers { get; set; }
     public DbSet<Warehouse> Warehouses { get; set; }
     public DbSet<Transaction> Transactions { get; set; }
